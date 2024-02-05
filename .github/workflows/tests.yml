@@ -1,0 +1,64 @@
+name: Tests
+
+on: push
+
+jobs:
+  test-gh-truncate:
+    name: Test GH truncate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+      - uses: actions/checkout@v4
+      - name: Install Depenencies
+        run: yarn install
+      - name: test
+        run: yarn test
+      - name: String truncated
+        id: truncateTest
+        uses: psilore/gh-truncate-string-action@main
+        with:
+          stringToTruncate: 'abcdefghijklmnopqrstuvwxyz'
+          maxLength: 10
+      - name: Validate truncate test
+        if: ${{ steps.truncateTest.outputs.string != 'abcdefghij' }}
+        run: exit 1
+      - name: String untouched less than Max Value
+        id: lessTest
+        uses: psilore/gh-truncate-string-action@main
+        with:
+          stringToTruncate: 'abcdefghijklmnopqrstuvwxyz'
+          maxLength: 27
+      - name: Validate less than max value test
+        if: ${{ steps.lessTest.outputs.string != 'abcdefghijklmnopqrstuvwxyz' }}
+        run: exit 1
+      - name: String untouched equal Max Value
+        id: equalTest
+        uses: psilore/gh-truncate-string-action@main
+        with:
+          stringToTruncate: 'abcdefghijklmnopqrstuvwxyz'
+          maxLength: 26
+      - name: Validate less than max value test
+        if: ${{ steps.equalTest.outputs.string != 'abcdefghijklmnopqrstuvwxyz' }}
+        run: exit 1
+      - name: String without one dangling character
+        id: oneDanglingTest
+        uses: psilore/gh-truncate-string-action@main
+        with:
+          stringToTruncate: 'abcdefghi-jklmnopqrstuvwxyz'
+          maxLength: 10
+          removeDanglingCharacters: '-'
+      - name: Validate string without single dangling character test
+        if: ${{ steps.oneDanglingTest.outputs.string != 'abcdefghi' }}
+        run: exit 1
+      - name: String without dangling characters
+        id: multipleDanglingTest
+        uses: psilore/gh-truncate-string-action@main
+        with:
+          stringToTruncate: 'abcdefg#-?hijklmnopqrstuvwxyz'
+          maxLength: 10
+          removeDanglingCharacters: '?#-'
+      - name: Validate string without multiple dangling characters test
+        if: ${{ steps.multipleDanglingTest.outputs.string != 'abcdefg' }}
+        run: exit 1
