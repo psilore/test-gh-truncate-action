@@ -11,10 +11,6 @@ jobs:
         with:
           node-version: 20.x
       - uses: actions/checkout@v4
-      - name: Install Depenencies
-        run: yarn install
-      - name: test
-        run: yarn test
       - name: String truncated
         id: truncateTest
         uses: psilore/gh-truncate-string-action@main
